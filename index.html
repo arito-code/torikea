@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        padding: 24px;
+        background: #e8f5e9; /* やさしい黄緑 */
+      }
+      .container {
+        max-width: 840px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 24px 32px 30px;
+        border-radius: 18px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        border: 2px solid #c8e6c9;
+        position: relative;
+      }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 4px;
+        text-align: center;
+        color: #1b5e20;
+      }
+      .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #4e6e4f;
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 15px;
+        line-height: 1.7;
+      }
+      .top-right-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+      }
+      .top-right-btn .btn-small {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid #a5d6a7;
+        background: #ffffff;
+        color: #2e7d32;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .top-right-btn .btn-small:hover {
+        background: #e8f5e9;
+      }
+
+      .step {
+        margin: 18px 0;
+        padding: 16px 18px 18px;
+        border-radius: 14px;
+        background: #f1f8e9;
+        border: 1px solid #c5e1a5;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .step-badge {
+        min-width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #66bb6a;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+      .step-content {
+        flex: 1;
+      }
+      .step-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 6px;
+        color: #2e7d32;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 16px;
+        padding: 12px 22px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        margin: 6px 0;
+        min-width: 280px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        transition: transform 0.05s ease-out, box-shadow 0.05s ease-out, background 0.1s;
+      }
+      .btn span.icon {
+        font-size: 18px;
+      }
+      .btn-primary {
+        background: #43a047;
+        color: #ffffff;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: #2e7d32;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.18);
+      }
+      .btn-secondary {
+        background: #ffffff;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background: #e8f5e9;
+        transform: translateY(-1px);
+      }
+      .btn-link {
+        background: #ffffff;
+        border: 1px solid #cfd8dc;
+        color: #37474f;
+      }
+      .btn-link:hover:not(:disabled) {
+        background: #eceff1;
+        transform: translateY(-1px);
+      }
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+      #fileInput {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+      #status {
+        margin-top: 18px;
+        min-height: 26px;
+        font-size: 14px;
+        padding: 8px 10px;
+        border-radius: 8px;
+      }
+      #status.ok {
+        color: #1b5e20;
+        background: #e8f5e9;
+        border: 1px solid #a5d6a7;
+      }
+      #status.error {
+        color: #b71c1c;
+        background: #ffebee;
+        border: 1px solid #ffcdd2;
+      }
+      #loadingOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,0.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        flex-direction: column;
+        font-size: 16px;
+        color: #2e7d32;
+      }
+      .spinner {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 5px solid #c8e6c9;
+        border-top-color: #43a047;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 14px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      small {
+        font-size: 12px;
+        color: #607d8b;
+      }
+      .note {
+        font-size: 13px;
+        color: #455a64;
+        margin-top: 6px;
+      }
+      .footer-note {
+        margin-top: 16px;
+        font-size: 12px;
+        color: #78909c;
+        text-align: center;
+      }
+
+      /* 地域掛け率（I2 / J2）入力エリア */
+      .rates-box {
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #ffffff;
+        border: 1px solid #c5e1a5;
+      }
+      .rates-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .rate-field {
+        flex: 1;
+        min-width: 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .rate-label {
+        font-size: 14px;
+        font-weight: bold;
+        color: #2e7d32;
+      }
+      .rate-sub {
+        font-size: 12px;
+        color: #607d8b;
+      }
+      .rate-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .rate-input {
+        flex: 1;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid #b0bec5;
+        font-size: 14px;
+      }
+      .rate-input::placeholder {
+        color: #b0bec5;
+      }
+      .rate-unit {
+        font-size: 13px;
+        color: #607d8b;
+        white-space: nowrap;
+      }
+      .rates-status {
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .rates-status.ok {
+        color: #1b5e20;
+      }
+      .rates-status.err {
+        color: #b71c1c;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ローディング用のオーバーレイ -->
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <div>処理中です…（数秒〜十数秒かかることがあります）</div>
+    </div>
+
+    <div class="container">
+      <!-- 右上：元スプシを開くボタン -->
+      <div class="top-right-btn">
+        <button class="btn-small" id="openSheetBtn">
+          <span>📊</span>
+          <span>元のスプシデータを開く</span>
+        </button>
+      </div>
+
+      <h1>トリケア → マネーフォワード変換</h1>
+      <div class="subtitle">
+        ①〜⑤の順番でボタンを押すだけで、請求用CSVを作れます 🌿
+      </div>
+
+      <!-- ステップ1：トリケアでCSVダウンロード -->
+      <div class="step">
+        <div class="step-badge">1</div>
+        <div class="step-content">
+          <div class="step-title">トリケアからCSVをダウンロードする</div>
+          <p>
+            まず、トリケアを開いて<br>
+            画面上で <b>「サービス利用実績」</b> のCSVをダウンロードしてください。
+          </p>
+          <button class="btn btn-secondary" id="openTricareBtn">
+            <span class="icon">🏥</span>
+            <span>トリケア（TZAD010）を開く</span>
+          </button>
+          <div class="note">
+            トリケア　「サービス利用実績」のCSVをダウンロードするところからスタートします。
+          </div>
+        </div>
+      </div>
+
+      <!-- ステップ2：地域掛け率を設定する -->
+      <div class="step">
+        <div class="step-badge">2</div>
+        <div class="step-content">
+          <div class="step-title">地域掛け率を設定する</div>
+          <p>
+            シート「計算データ」の<br>
+            <b>I2：患者負担率</b> と <b>J2：処遇改善Ⅱ率（%）</b> をここで設定できます。<br>
+            何も入っていないときは、<b>I2 = 0.1 / J2 = 0</b> を自動で使います。
+          </p>
+
+          <div class="rates-box">
+            <div class="rates-row">
+              <div class="rate-field">
+                <div class="rate-label">患者負担率（I2）</div>
+                <div class="rate-sub">例：0.1 など（空なら 0.1 を使用）</div>
+                <div class="rate-input-wrap">
+                  <input
+                    id="inputCoef"
+                    type="number"
+                    step="0.1"
+                    class="rate-input"
+                    placeholder="0.1"
+                  >
+                </div>
+              </div>
+
+              <div class="rate-field">
+                <div class="rate-label">処遇改善Ⅱ率（J2, %）</div>
+                <div class="rate-sub">例：22.4 など（空なら 0% を使用）</div>
+                <div class="rate-input-wrap">
+                  <input
+                    id="inputExtraRate"
+                    type="number"
+                    step="0.1"
+                    class="rate-input"
+                    placeholder="22.4"
+                  >
+                  <span class="rate-unit">%</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-secondary" id="saveRatesBtn">
+              <span class="icon">💾</span>
+              <span>設定を保存する</span>
+            </button>
+            <div id="ratesStatus" class="rates-status"></div>
+          </div>
+
+          <div class="note">
+            「設定を保存する」を押すと、シート「計算データ」の I2 / J2 に書き込むだけで、計算はまだ行いません。<br>
+            そのあと、ステップ③の CSV 取り込みを行ってください。
+          </div>
+        </div>
+      </div>
+
+      <!-- ステップ3：CSV取り込み -->
+      <div class="step">
+        <div class="step-badge">3</div>
+        <div class="step-content">
+          <div class="step-title">トリケアのCSVをえらぶ</div>
+          <p>
+            ステップ①でダウンロードした <b>トリケアのCSVファイル</b> を選んでください。<br>
+            そのあと、下のボタンを押すと、シートに取り込み → 自動で計算まで行います。
+          </p>
+          <input type="file" id="fileInput" accept=".csv"><br>
+          <button class="btn btn-primary" id="uploadBtn">
+            <span class="icon">📂</span>
+            <span>CSVを取り込んで変換する</span>
+          </button>
+          <div class="note">
+            ※ 取り込むと「トリケア_CSV」シートの中身は新しいデータで上書きされます。
+          </div>
+        </div>
+      </div>
+
+      <!-- ステップ4：CSVダウンロード -->
+      <div class="step">
+        <div class="step-badge">4</div>
+        <div class="step-content">
+          <div class="step-title">マネフォ用CSVをダウンロードする</div>
+          <p>
+            変換が終わったら、このボタンから<br>
+            <b>マネーフォワードにアップするCSV</b> をダウンロードします。
+          </p>
+          <button class="btn btn-primary" id="downloadBtn">
+            <span class="icon">⬇️</span>
+            <span>マネフォ用CSVをダウンロード</span>
+          </button><br>
+          <small>シート「マネーフォワード」の内容がそのままCSVになります。</small>
+        </div>
+      </div>
+
+      <!-- ステップ5：マネフォにアップロード -->
+      <div class="step">
+        <div class="step-badge">5</div>
+        <div class="step-content">
+          <div class="step-title">マネフォにCSVをアップロードする</div>
+          <p>
+            マネーフォワードの請求画面を開き、<br>
+            ステップ④でダウンロードしたCSVをアップロードしてください。
+          </p>
+          <button class="btn btn-secondary" id="openMfBtn">
+            <span class="icon">💻</span>
+            <span>マネーフォワード 請求画面を開く</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="status"></div>
+
+      <div class="footer-note">
+        迷ったときは、① → ② → ③ → ④ → ⑤ の順番だけ意識すればOKです 😊
+      </div>
+    </div>
+
+    <script>
+      const SPREADSHEET_URL = '<?= SPREADSHEET_URL ?>';
+      const MF_URL = '<?= MF_URL ?>';
+      const TRICARE_URL = '<?= TRICARE_URL ?>';
+
+      const uploadBtn = document.getElementById('uploadBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const openSheetBtn = document.getElementById('openSheetBtn');
+      const openMfBtn = document.getElementById('openMfBtn');
+      const openTricareBtn = document.getElementById('openTricareBtn');
+      const fileInput = document.getElementById('fileInput');
+      const statusEl = document.getElementById('status');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+
+      // 地域掛け率（I2 / J2）の入力用
+      const inputCoef = document.getElementById('inputCoef');
+      const inputExtraRate = document.getElementById('inputExtraRate');
+      const saveRatesBtn = document.getElementById('saveRatesBtn');
+      const ratesStatusEl = document.getElementById('ratesStatus');
+
+      function setButtonsDisabled(disabled) {
+        [uploadBtn, downloadBtn, openSheetBtn, openMfBtn, openTricareBtn].forEach(btn => {
+          if (btn) btn.disabled = disabled;
+        });
+      }
+
+      function showLoading(show) {
+        if (loadingOverlay) {
+          loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+      }
+
+      function setStatus(message, type) {
+        if (!statusEl) return;
+        statusEl.textContent = message || '';
+        statusEl.className = '';
+        if (type) statusEl.classList.add(type);
+      }
+
+      // I2 / J2 の現在値をサーバーから取得して、画面に反映
+      function loadRates() {
+        if (!inputCoef || !inputExtraRate || !ratesStatusEl) return;
+
+        ratesStatusEl.textContent = '設定を読み込み中…';
+        ratesStatusEl.className = 'rates-status';
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res) {
+              inputCoef.value = (res.coef !== undefined) ? res.coef : '';
+              inputExtraRate.value = (res.extraRatePercent !== undefined) ? res.extraRatePercent : '';
+            }
+            ratesStatusEl.textContent = '現在の設定を読み込みました。';
+            ratesStatusEl.classList.add('ok');
+          })
+          .withFailureHandler((err) => {
+            console.error(err);
+            const msg = err && err.message ? err.message : err;
+            ratesStatusEl.textContent = '設定の読み込みに失敗しました：' + msg;
+            ratesStatusEl.classList.add('err');
+          })
+          .getRatesForWeb();
+      }
+
+      // I2 / J2 をシートに保存
+      function saveRates() {
+        if (!inputCoef || !inputExtraRate || !ratesStatusEl) return;
+
+        let coefVal = inputCoef.value.trim();
+        let extraVal = inputExtraRate.value.trim();
+
+        // 空ならデフォルトを使う
+        if (coefVal === '') coefVal = '0.1';
+        if (extraVal === '') extraVal = '0';
+
+        const coefNum = Number(coefVal);
+        const extraNum = Number(extraVal);
+
+        if (!Number.isFinite(coefNum)) {
+          ratesStatusEl.textContent = '患者負担率（I2）は数字で入力してください。';
+          ratesStatusEl.className = 'rates-status err';
+          return;
+        }
+        if (!Number.isFinite(extraNum)) {
+          ratesStatusEl.textContent = '処遇改善Ⅱ率（J2, %）は数字で入力してください。';
+          ratesStatusEl.className = 'rates-status err';
+          return;
+        }
+
+        ratesStatusEl.textContent = '設定を保存中です…';
+        ratesStatusEl.className = 'rates-status';
+        if (saveRatesBtn) saveRatesBtn.disabled = true;
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (saveRatesBtn) saveRatesBtn.disabled = false;
+            ratesStatusEl.textContent =
+              '設定を保存しました。（患者負担率：' + res.coef +
+              ' ／ 処遇改善Ⅱ率：' + res.extraRatePercent + '%）';
+            ratesStatusEl.className = 'rates-status ok';
+          })
+          .withFailureHandler((err) => {
+            if (saveRatesBtn) saveRatesBtn.disabled = false;
+            console.error(err);
+            const msg = err && err.message ? err.message : err;
+            ratesStatusEl.textContent = '設定の保存に失敗しました：' + msg;
+            ratesStatusEl.className = 'rates-status err';
+          })
+          .updateRatesFromWeb(coefNum, extraNum);
+      }
+
+      // CSV取り込み＋変換（③）
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', () => {
+          const file = fileInput && fileInput.files[0];
+          if (!file) {
+            alert('CSVファイルを選んでください。');
+            return;
+          }
+
+          setButtonsDisabled(true);
+          showLoading(true);
+          setStatus('トリケアCSVを取り込み中です…', '');
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const text = e.target.result;
+
+            google.script.run
+              .withSuccessHandler((result) => {
+                showLoading(false);
+                setButtonsDisabled(false);
+
+                const rows = result && result.rowCount ? result.rowCount : '?';
+                setStatus('変換が完了しました。（読み込み行数：' + rows + ' 行）', 'ok');
+              })
+              .withFailureHandler((err) => {
+                showLoading(false);
+                setButtonsDisabled(false);
+                console.error(err);
+                const msg = err && err.message ? err.message : err;
+                setStatus('エラーが発生しました：' + msg, 'error');
+              })
+              .importCsvAndConvert(text);
+          };
+
+          reader.onerror = () => {
+            showLoading(false);
+            setButtonsDisabled(false);
+            setStatus('ファイルの読み込みに失敗しました。もう一度お試しください。', 'error');
+          };
+
+          // トリケアのCSVは Shift_JIS 想定で読み込み
+          reader.readAsText(file, 'Shift_JIS');
+        });
+      }
+
+      // CSVダウンロード（④）
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+          setButtonsDisabled(true);
+          showLoading(true);
+          setStatus('CSVを準備中です…', '');
+
+          google.script.run
+            .withSuccessHandler((result) => {
+              showLoading(false);
+              setButtonsDisabled(false);
+
+              if (!result || !result.content) {
+                setStatus('CSVデータが取得できませんでした。', 'error');
+                return;
+              }
+
+              const blob = new Blob([result.content], {
+                type: 'text/csv;charset=UTF-8;'
+              });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = result.filename || 'tricare_to_mf.csv';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+
+              setStatus('CSVのダウンロードが完了しました。', 'ok');
+            })
+            .withFailureHandler((err) => {
+              showLoading(false);
+              setButtonsDisabled(false);
+              console.error(err);
+              const msg = err && err.message ? err.message : err;
+              setStatus('エラーが発生しました：' + msg, 'error');
+            })
+            .getProcessedCsv();
+        });
+      }
+
+      // 「設定を保存する」ボタン（②）
+      if (saveRatesBtn) {
+        saveRatesBtn.addEventListener('click', saveRates);
+      }
+
+      // トリケアを開く（①）
+      if (openTricareBtn) {
+        openTricareBtn.addEventListener('click', () => {
+          window.open(TRICARE_URL, '_blank');
+        });
+      }
+
+      // マネフォを開く（⑤）
+      if (openMfBtn) {
+        openMfBtn.addEventListener('click', () => {
+          window.open(MF_URL, '_blank');
+        });
+      }
+
+      // 元スプシを開く（右上）
+      if (openSheetBtn) {
+        openSheetBtn.addEventListener('click', () => {
+          window.open(SPREADSHEET_URL, '_blank');
+        });
+      }
+
+      // 初期表示のときに I2 / J2 を読み込む
+      window.addEventListener('load', () => {
+        loadRates();
+      });
+    </script>
+  </body>
+</html>
